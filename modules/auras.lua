@@ -550,8 +550,11 @@ local function renderAura(parent, frame, type, config, displayConfig, index, fil
 	end
 
 	-- Show the cooldown ring
-	if( not ShadowUF.db.profile.auras.disableCooldown and duration > 0 and endTime > 0 and ( config.timers.ALL or ( category == "player" and config.timers.SELF ) or ( category == "boss" and config.timers.BOSS ) ) ) then
-		button.cooldown:SetCooldown(endTime - duration, duration)
+	-- MOP Classic: duration and endTime can be strings, ensure they're numbers before comparison
+	local numDuration = tonumber(duration) or 0
+	local numEndTime = tonumber(endTime) or 0
+	if( not ShadowUF.db.profile.auras.disableCooldown and numDuration > 0 and numEndTime > 0 and ( config.timers.ALL or ( category == "player" and config.timers.SELF ) or ( category == "boss" and config.timers.BOSS ) ) ) then
+		button.cooldown:SetCooldown(numEndTime - numDuration, numDuration)
 		button.cooldown:Show()
 	else
 		button.cooldown:Hide()
@@ -579,7 +582,8 @@ local function renderAura(parent, frame, type, config, displayConfig, index, fil
 	button.columnHasScaled = nil
 	button.previousHasScale = nil
 	button.icon:SetTexture(texture)
-	button.stack:SetText(count > 1 and count or "")
+	-- MOP Classic: count can be nil, ensure it's a number before comparison
+	button.stack:SetText((count and count > 1) and count or "")
 	button:Show()
 end
 
@@ -594,7 +598,21 @@ local function scan(parent, frame, type, config, displayConfig, filter)
 	local index = 0
 	while( true ) do
 		index = index + 1
-		local name, texture, count, auraType, duration, endTime, caster, isRemovable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff = AuraUtil.UnpackAuraData(C_UnitAuras.GetAuraDataByIndex(frame.parent.unit, index, filter))
+		-- MoP Classic API: name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod
+		local name, texture, count, auraType, duration, endTime, caster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff
+		if filter == "HELPFUL" then
+			name, texture, count, auraType, duration, endTime, caster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff = UnitBuff(frame.parent.unit, index)
+		else
+			name, texture, count, auraType, duration, endTime, caster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff = UnitDebuff(frame.parent.unit, index)
+		end
+		
+		-- MoP Classic: Convert duration and endTime to numbers to prevent comparison errors
+		duration = tonumber(duration) or 0
+		endTime = tonumber(endTime) or 0
+		local isRemovable = isStealable
+		local nameplateShowPersonal = false
+		local canApplyAura = true
+		local isBossDebuff = false
 		if( not name ) then break end
 
 		renderAura(parent, frame, type, config, displayConfig, index, filter, isFriendly, curable, name, texture, count, auraType, duration, endTime, caster, isRemovable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff)

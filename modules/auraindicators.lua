@@ -193,7 +193,16 @@ local function scanAuras(frame, filter, type)
 	local index = 0
 	while( true ) do
 		index = index + 1
-		local name, texture, count, auraType, duration, endTime, caster, isRemovable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff = AuraUtil.UnpackAuraData(C_UnitAuras.GetAuraDataByIndex(frame.unit, index, filter))
+		local name, rank, texture, count, auraType, duration, endTime, caster, isStealable, shouldConsolidate, spellID
+		if filter == "HELPFUL" then
+			name, rank, texture, count, auraType, duration, endTime, caster, isStealable, shouldConsolidate, spellID = UnitBuff(frame.unit, index)
+		else
+			name, rank, texture, count, auraType, duration, endTime, caster, isStealable, shouldConsolidate, spellID = UnitDebuff(frame.unit, index)
+		end
+		local isRemovable = isStealable
+		local nameplateShowPersonal = false
+		local canApplyAura = true
+		local isBossDebuff = false
 		if( not name ) then return end
 
 		local result = checkFilterAura(frame, type, isFriendly, name, texture, count, auraType, duration, endTime, caster, isRemovable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff)

@@ -92,22 +92,28 @@ function ShadowUF:OnInitialize()
 end
 
 function ShadowUF.UnitAuraBySpell(unit, spell, filter)
-	local auraData
-	if type(spell) == "string" then
-		auraData = C_UnitAuras.GetAuraDataBySpellName(unit, spell, filter)
-	elseif type(spell) == "number" then
-		local index = 0
-		while true do
-			index = index + 1
-			local data = C_UnitAuras.GetAuraDataByIndex(unit, index, filter)
-			if not data then break end
-			if data.spellId == spell then
-				auraData = data
-				break
-			end
+	local index = 1
+	local name, rank, texture, count, auraType, duration, endTime, caster, isStealable, shouldConsolidate, spellID
+	
+	while true do
+		if filter == "HELPFUL" then
+			name, rank, texture, count, auraType, duration, endTime, caster, isStealable, shouldConsolidate, spellID = UnitBuff(unit, index)
+		else
+			name, rank, texture, count, auraType, duration, endTime, caster, isStealable, shouldConsolidate, spellID = UnitDebuff(unit, index)
 		end
+		
+		if not name then break end
+		
+		if type(spell) == "string" and name == spell then
+			return name, rank, texture, count, auraType, duration, endTime, caster, isStealable, shouldConsolidate, spellID
+		elseif type(spell) == "number" and spellID == spell then
+			return name, rank, texture, count, auraType, duration, endTime, caster, isStealable, shouldConsolidate, spellID
+		end
+		
+		index = index + 1
 	end
-	return AuraUtil.UnpackAuraData(auraData)
+	
+	return nil
 end
 
 function ShadowUF:CheckBuild()
@@ -121,10 +127,7 @@ end
 function ShadowUF:CheckUpgrade()
 	local revision = self.db.profile.revision or self.dbRevision
 	if (revision <= 62 ) then
-		-- evoker setup
-		self.db.profile.classColors.EVOKER = {r = 0.20, g = 0.58, b = 0.50}
-		self.db.profile.powerColors.ESSENCE = {r = 0.40, g = 0.80, b = 1.00}
-		self.db.profile.units.player.essence = {enabled = true, anchorTo = "$parent", order = 60, height = 0.40, anchorPoint = "BR", x = -8, y = 6, size = 12, spacing = -2, growth = "LEFT", isBar = true, showAlways = true}
+		-- MOP Classic: Evoker and Essence removed (didn't exist in MOP)
 	end
 	if (revision <= 61 ) then
 		if self.db.profile.bars.texture == "Smooth" then
@@ -183,15 +186,8 @@ function ShadowUF:CheckUpgrade()
 	end
 
 	if( revision <= 56 ) then
-		-- new classes
-		self.db.profile.classColors.DEMONHUNTER = {r = 0.64, g = 0.19, b = 0.79}
-
-		-- new power types
-		self.db.profile.powerColors.INSANITY = {r = 0.40, g = 0, b = 0.80}
-		self.db.profile.powerColors.MAELSTROM = {r = 0.00, g = 0.50, b = 1.00}
-		self.db.profile.powerColors.FURY = {r = 0.788, g = 0.259, b = 0.992}
-		self.db.profile.powerColors.PAIN = {r = 1, g = 0, b = 0}
-		self.db.profile.powerColors.LUNAR_POWER = {r = 0.30, g = 0.52, b = 0.90}
+		-- MOP Classic: Removed modern classes and power types that didn't exist in MOP
+		-- Only keeping ARCANECHARGES as it existed in MOP
 		self.db.profile.powerColors.ARCANECHARGES = {r = 0.1, g = 0.1, b = 0.98}
 
 		-- new bars
@@ -589,7 +585,7 @@ end
 -- Module APIs
 function ShadowUF:RegisterModule(module, key, name, isBar, class, spec, level)
 	-- Prevent duplicate registration for deprecated plugin
-	if( key == "auraIndicators" and C_AddOns.IsAddOnLoaded("ShadowedUF_Indicators") and self.modules.auraIndicators ) then
+	if( key == "auraIndicators" and IsAddOnLoaded("ShadowedUF_Indicators") and self.modules.auraIndicators ) then
 		self:Print(L["WARNING! ShadowedUF_Indicators has been deprecated as v4 and is now built in. Please delete ShadowedUF_Indicators, your configuration will be saved."])
 		return
 	end
@@ -679,29 +675,35 @@ end
 local function basicHideBlizzardFrames(...)
 	for i=1, select("#", ...) do
 		local frame = select(i, ...)
-		frame:UnregisterAllEvents()
-		frame:HookScript("OnShow", rehideFrame)
-		frame:Hide()
+		-- MOP Classic: Check if frame exists before trying to use it
+		if frame then
+			frame:UnregisterAllEvents()
+			frame:HookScript("OnShow", rehideFrame)
+			frame:Hide()
+		end
 	end
 end
 
 local function hideBlizzardFrames(taint, ...)
 	for i=1, select("#", ...) do
 		local frame = select(i, ...)
-		UnregisterUnitWatch(frame)
-		frame:UnregisterAllEvents()
-		frame:Hide()
+		-- MOP Classic: Check if frame exists before trying to use it
+		if frame then
+			UnregisterUnitWatch(frame)
+			frame:UnregisterAllEvents()
+			frame:Hide()
 
-		if( frame.manabar ) then frame.manabar:UnregisterAllEvents() end
-		if( frame.healthbar ) then frame.healthbar:UnregisterAllEvents() end
-		if( frame.spellbar ) then frame.spellbar:UnregisterAllEvents() end
-		if( frame.powerBarAlt ) then frame.powerBarAlt:UnregisterAllEvents() end
+			if( frame.manabar ) then frame.manabar:UnregisterAllEvents() end
+			if( frame.healthbar ) then frame.healthbar:UnregisterAllEvents() end
+			if( frame.spellbar ) then frame.spellbar:UnregisterAllEvents() end
+			if( frame.powerBarAlt ) then frame.powerBarAlt:UnregisterAllEvents() end
 
-		if( taint ) then
-			frame.Show = ShadowUF.noop
-		else
-			frame:SetParent(ShadowUF.hiddenFrame)
-			frame:HookScript("OnShow", rehideFrame)
+			if( taint ) then
+				frame.Show = ShadowUF.noop
+			else
+				frame:SetParent(ShadowUF.hiddenFrame)
+				frame:HookScript("OnShow", rehideFrame)
+			end
 		end
 	end
 end
@@ -932,7 +934,7 @@ SlashCmdList["SHADOWEDUF"] = function(msg)
 		return
 	end
 
-	local loaded, reason = C_AddOns.LoadAddOn("ShadowedUF_Options")
+	local loaded, reason = LoadAddOn("ShadowedUF_Options")
 	if( not ShadowUF.Config ) then
 		DEFAULT_CHAT_FRAME:AddMessage(string.format(L["Failed to load ShadowedUF_Options, cannot open configuration. Error returned: %s"], reason and _G["ADDON_" .. reason] or ""))
 		return

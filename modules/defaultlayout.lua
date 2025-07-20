@@ -136,8 +136,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 		WARRIOR = {r = 0.78, g = 0.61, b = 0.43},
 		DEATHKNIGHT = {r = 0.77, g = 0.12 , b = 0.23},
 		MONK = {r = 0.0, g = 1.00 , b = 0.59},
-		DEMONHUNTER = {r = 0.64, g = 0.19, b = 0.79},
-		EVOKER = {r = 0.20, g = 0.58, b = 0.50},
+
 		PET = {r = 0.20, g = 0.90, b = 0.20},
 		VEHICLE = {r = 0.23, g = 0.41, b = 0.23},
 	}
@@ -151,16 +150,13 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 		AMMOSLOT = {r = 0.85, g = 0.60, b = 0.55},
 		FUEL = {r = 0.85, g = 0.47, b = 0.36},
 		COMBOPOINTS = {r = 1.0, g = 0.80, b = 0.0},
-		INSANITY = {r = 0.40, g = 0, b = 0.80},
-		MAELSTROM = {r = 0.00, g = 0.50, b = 1.00},
-		LUNAR_POWER = {r = 0.30, g = 0.52, b = 0.90},
+
 		HOLYPOWER = {r = 0.95, g = 0.90, b = 0.60},
 		SOULSHARDS = {r = 0.58, g = 0.51, b = 0.79},
 		ARCANECHARGES = {r = 0.1, g = 0.1, b = 0.98},
 		ALTERNATE = {r = 0.815, g = 0.941, b = 1},
 		CHI = {r = 0.71, g = 1.0, b = 0.92},
-		FURY = {r = 0.788, g = 0.259, b = 0.992},
-		PAIN = {r = 1, g = 0, b = 0},
+
 		STATUE = {r = 0.35, g = 0.45, b = 0.60},
 		RUNEOFPOWER = {r = 0.35, g = 0.45, b = 0.60},
 		MUSHROOMS = {r = 0.20, g = 0.90, b = 0.20},
@@ -168,7 +164,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 		STAGGER_GREEN = {r = 0.52, g = 1.0, b = 0.52},
 		STAGGER_YELLOW = {r = 1.0, g = 0.98, b = 0.72},
 		STAGGER_RED = {r = 1.0, g = 0.42, b = 0.42},
-		ESSENCE = {r = 0.40, g = 0.80, b = 1.00},
+
 	}
 	config.healthColors = {
 		tapped = {r = 0.5, g = 0.5, b = 0.5},

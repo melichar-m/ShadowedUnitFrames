@@ -246,7 +246,8 @@ end
 local function SetVisibility(self)
 	local layoutUpdate
 	local instanceType = select(2, IsInInstance()) or "none"
-	local playerSpec = GetSpecialization()
+	-- MOP Classic: GetSpecialization() doesn't exist, disable specialization-based features
+	local playerSpec = nil
 	if( instanceType == "scenario" ) then instanceType = "party" end
 
 	-- Selectively disable modules
@@ -426,7 +427,17 @@ end
 
 local function createFakeUnitUpdateTimer(frame)
 	if( not frame.updateTimer ) then
-		frame.updateTimer = C_Timer.NewTicker(0.5, function() if( UnitExists(frame.unit) ) then frame:FullUpdate() end end)
+		-- MOP Classic: Replace C_Timer with CreateFrame timer
+		frame.updateTimer = CreateFrame("Frame")
+		frame.updateTimer:SetScript("OnUpdate", function(self, elapsed)
+			self.elapsed = (self.elapsed or 0) + elapsed
+			if self.elapsed >= 0.5 then
+				self.elapsed = 0
+				if UnitExists(frame.unit) then
+					frame:FullUpdate()
+				end
+			end
+		end)
 	end
 end
 
@@ -642,7 +653,8 @@ local secureInitializeUnit = [[
 	end
 ]]
 
-local unitButtonTemplate = ClickCastHeader and ("ClickCastUnitTemplate,SUF_SecureUnitTemplate,PingableUnitFrameTemplate,BackdropTemplate") or ("SUF_SecureUnitTemplate,PingableUnitFrameTemplate,BackdropTemplate")
+-- MOP Classic: Remove PingableUnitFrameTemplate as it doesn't exist in MOP Classic
+local unitButtonTemplate = ClickCastHeader and ("ClickCastUnitTemplate,SUF_SecureUnitTemplate,BackdropTemplate") or ("SUF_SecureUnitTemplate,BackdropTemplate")
 
 -- Header unit initialized
 local function initializeUnit(header, frameName)
@@ -687,8 +699,9 @@ local function ClassToken(self)
 end
 
 local function ArenaClassToken(self)
-	local specID = GetArenaOpponentSpec(self.unitID)
-	return specID and select(6, GetSpecializationInfoByID(specID))
+	-- MOP Classic: GetArenaOpponentSpec and GetSpecializationInfoByID don't exist
+	-- Use class token instead for MOP Classic compatibility
+	return (select(2, UnitClass(self.unit)))
 end
 
 function Units:CreateUnit(...)
@@ -889,7 +902,7 @@ function Units:SetHeaderAttributes(frame, type)
 		frame:SetAttribute("roleFilter", config.roleFilter)
 
 		if( config.groupBy == "CLASS" ) then
-			frame:SetAttribute("groupingOrder", "DEATHKNIGHT,DEMONHUNTER,DRUID,HUNTER,MAGE,PALADIN,PRIEST,ROGUE,SHAMAN,WARLOCK,WARRIOR,MONK,EVOKER")
+			frame:SetAttribute("groupingOrder", "DEATHKNIGHT,DRUID,HUNTER,MAGE,PALADIN,PRIEST,ROGUE,SHAMAN,WARLOCK,WARRIOR,MONK")
 			frame:SetAttribute("groupBy", "CLASS")
 		elseif( config.groupBy == "ASSIGNEDROLE" ) then
 			frame:SetAttribute("groupingOrder", "TANK,HEALER,DAMAGER,NONE")
@@ -960,7 +973,7 @@ function Units:LoadUnit(unit)
 		return
 	end
 
-	local frame = self:CreateUnit("Button", "SUFUnit" .. unit, petBattleFrame, "SecureUnitButtonTemplate,PingableUnitFrameTemplate,BackdropTemplate")
+	local frame = self:CreateUnit("Button", "SUFUnit" .. unit, petBattleFrame, "SecureUnitButtonTemplate,BackdropTemplate")
 	frame:SetAttribute("unit", unit)
 	frame.hasStateWatch = unit == "pet"
 
@@ -1188,7 +1201,7 @@ function Units:LoadZoneHeader(type)
 	end
 
 	for id, unit in pairs(ShadowUF[type .. "Units"]) do
-		local frame = self:CreateUnit("Button", "SUFHeader" .. type .. "UnitButton" .. id, headerFrame, "SecureUnitButtonTemplate,PingableUnitFrameTemplate,BackdropTemplate")
+		local frame = self:CreateUnit("Button", "SUFHeader" .. type .. "UnitButton" .. id, headerFrame, "SecureUnitButtonTemplate,BackdropTemplate")
 		frame.ignoreAnchor = true
 		frame.hasStateWatch = true
 		frame.unitUnmapped = type .. id
@@ -1304,7 +1317,7 @@ function Units:LoadChildUnit(parent, type, id)
 	end
 
 	-- Now we can create the actual frame
-	local frame = self:CreateUnit("Button", "SUFChild" .. type .. string.match(parent:GetName(), "(%d+)"), parent, "SecureUnitButtonTemplate,PingableUnitFrameTemplate,BackdropTemplate")
+	local frame = self:CreateUnit("Button", "SUFChild" .. type .. string.match(parent:GetName(), "(%d+)"), parent, "SecureUnitButtonTemplate,BackdropTemplate")
 	frame.unitType = type
 	frame.parent = parent
 	frame.isChildUnit = true
@@ -1490,7 +1503,7 @@ local curableSpells = {
 	["MONK"] = {[115450] = {"Poison", "Disease", "Magic"}, [218164] = {"Poison", "Disease"}},
 	["MAGE"] = {[475] = {"Curse"}},
 	["WARLOCK"] = {[89808] = {"Magic"}},
-	["EVOKER"] = {[365585] = {"Poison"}, [360823] = {"Magic", "Poison"}, [374251] = {"Poison", "Curse", "Disease"}}
+
 }
 
 curableSpells = curableSpells[playerClass]

@@ -1198,20 +1198,7 @@ local function loadGeneralOptions()
 								arg = "powerColors.AURAPOINTS",
 								hidden = function() return not ShadowUF.modules.auraPoints end
 							},
-							INSANITY = {
-								order = 12,
-								type = "color",
-								name = L["Insanity"],
-								arg = "powerColors.INSANITY",
-								hidden = function(info) return select(2, UnitClass("player")) ~= "PRIEST" end,
-							},
-							MAELSTROM = {
-								order = 12,
-								type = "color",
-								name = L["Maelstrom"],
-								arg = "powerColors.MAELSTROM",
-								hidden = function(info) return select(2, UnitClass("player")) ~= "SHAMAN" end,
-							},
+
 							HOLYPOWER = {
 								order = 12,
 								type = "color",
@@ -1242,27 +1229,7 @@ local function loadGeneralOptions()
 								arg = "powerColors.CHI",
 								hidden = function(info) return select(2, UnitClass("player")) ~= "MONK" end,
 							},
-							FURY = {
-								order = 17,
-								type = "color",
-								name = L["Fury"],
-								arg = "powerColors.FURY",
-								hidden = function(info) return select(2, UnitClass("player")) ~= "DEMONHUNTER" end,
-							},
-							PAIN = {
-								order = 17,
-								type = "color",
-								name = L["Pain"],
-								arg = "powerColors.PAIN",
-								hidden = function(info) return select(2, UnitClass("player")) ~= "DEMONHUNTER" end,
-							},
-							LUNAR_POWER = {
-								order = 17,
-								type = "color",
-								name = L["Astral Power"],
-								arg = "powerColors.LUNAR_POWER",
-								hidden = function(info) return select(2, UnitClass("player")) ~= "DRUID" end,
-							},
+
 							MUSHROOMS = {
 								order = 17,
 								type = "color",

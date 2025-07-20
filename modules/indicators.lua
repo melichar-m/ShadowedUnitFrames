@@ -6,7 +6,8 @@ function Indicators:UpdateArenaSpec(frame)
 	if( not frame.indicators.arenaSpec or not frame.indicators.arenaSpec.enabled ) then return end
 
 	local specID = GetArenaOpponentSpec(frame.unitID)
-	local specIcon = specID and select(4, GetSpecializationInfoByID(specID))
+	-- MOP Classic: GetSpecializationInfoByID doesn't exist, disable specialization icon
+	local specIcon = nil
 	if( specIcon ) then
 		frame.indicators.arenaSpec:SetTexture(specIcon)
 		frame.indicators.arenaSpec:Show()
@@ -101,13 +102,11 @@ function Indicators:UpdateRaidTarget(frame)
 end
 
 function Indicators:UpdateQuestBoss(frame)
+	-- MOP Classic: UnitIsQuestBoss() doesn't exist, disable quest boss indicator
 	if( not frame.indicators.questBoss or not frame.indicators.questBoss.enabled ) then return end
 
-	if( UnitIsQuestBoss(frame.unit) ) then
-		frame.indicators.questBoss:Show()
-	else
-		frame.indicators.questBoss:Hide()
-	end
+	-- Quest boss indicators not supported in MOP Classic
+	frame.indicators.questBoss:Hide()
 end
 
 function Indicators:UpdateLFDRole(frame, event)
@@ -118,7 +117,8 @@ function Indicators:UpdateLFDRole(frame, event)
 		role = UnitGroupRolesAssigned(frame.unitOwner)
 	else
 		local specID = GetArenaOpponentSpec(frame.unitID)
-		role = specID and select(6, GetSpecializationInfoByID(specID))
+		-- MOP Classic: GetSpecializationInfoByID doesn't exist, disable spec-based role detection
+		role = nil
 	end
 
 	if( role == "TANK" ) then
@@ -363,13 +363,14 @@ function Indicators:OnEnable(frame)
 	    frame.indicators.resurrect:SetTexture("Interface\\RaidFrame\\Raid-Icon-Rez")
 	end
 
-	if( config.indicators.sumPending and config.indicators.sumPending.enabled ) then
-		frame:RegisterNormalEvent("INCOMING_SUMMON_CHANGED", self, "SummonPending")
-		frame:RegisterUpdateFunc(self, "SummonPending")
-
-		frame.indicators.sumPending = frame.indicators.sumPending or frame.indicators:CreateTexture(nil, "OVERLAY")
-		frame.indicators.sumPending:SetTexture("Interface\\RaidFrame\\RaidFrameSummon")
-	end
+	-- MOP Classic: INCOMING_SUMMON_CHANGED event doesn't exist, disable summon pending indicator
+	-- if( config.indicators.sumPending and config.indicators.sumPending.enabled ) then
+	--	frame:RegisterNormalEvent("INCOMING_SUMMON_CHANGED", self, "SummonPending")
+	--	frame:RegisterUpdateFunc(self, "SummonPending")
+	--
+	--	frame.indicators.sumPending = frame.indicators.sumPending or frame.indicators:CreateTexture(nil, "OVERLAY")
+	--	frame.indicators.sumPending:SetTexture("Interface\\RaidFrame\\RaidFrameSummon")
+	-- end
 
 	if( config.indicators.pvp and config.indicators.pvp.enabled ) then
 		frame:RegisterUnitEvent("UNIT_FACTION", self, "UpdatePVPFlag")

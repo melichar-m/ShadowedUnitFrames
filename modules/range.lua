@@ -21,7 +21,7 @@ local Range = {
 			(GetSpellName(47541)), -- Death Coil
 			(GetSpellName(49576)), -- Death Grip
 		},
-		["DEMONHUNTER"] = GetSpellName(185123), -- Throw Glaive
+
 		["DRUID"] = GetSpellName(8921),  -- Moonfire
 		["HUNTER"] = {
 			(GetSpellName(193455)), -- Cobra Shot
@@ -108,14 +108,23 @@ end
 
 local function createTimer(frame)
 	if( not frame.range.timer ) then
-		frame.range.timer = C_Timer.NewTicker(0.5, checkRange)
+		-- MOP Classic: Replace C_Timer with CreateFrame timer
+		frame.range.timer = CreateFrame("Frame")
 		frame.range.timer.parent = frame
+		frame.range.timer:SetScript("OnUpdate", function(self, elapsed)
+			self.elapsed = (self.elapsed or 0) + elapsed
+			if self.elapsed >= 0.5 then
+				self.elapsed = 0
+				checkRange()
+			end
+		end)
 	end
 end
 
 local function cancelTimer(frame)
 	if( frame.range and frame.range.timer ) then
-		frame.range.timer:Cancel()
+		-- MOP Classic: Stop timer by clearing OnUpdate script
+		frame.range.timer:SetScript("OnUpdate", nil)
 		frame.range.timer = nil
 	end
 end

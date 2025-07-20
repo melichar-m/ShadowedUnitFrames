@@ -51,14 +51,23 @@ end
 
 local function createFakeCastMonitor(frame)
 	if( not frame.castBar.monitor ) then
-		frame.castBar.monitor = C_Timer.NewTicker(0.10, monitorFakeCast)
+		-- MOP Classic: Replace C_Timer with CreateFrame timer
+		frame.castBar.monitor = CreateFrame("Frame")
 		frame.castBar.monitor.parent = frame
+		frame.castBar.monitor:SetScript("OnUpdate", function(self, elapsed)
+			self.elapsed = (self.elapsed or 0) + elapsed
+			if self.elapsed >= 0.10 then
+				self.elapsed = 0
+				monitorFakeCast()
+			end
+		end)
 	end
 end
 
 local function cancelFakeCastMonitor(frame)
 	if( frame.castBar and frame.castBar.monitor ) then
-		frame.castBar.monitor:Cancel()
+		-- MOP Classic: Stop timer by clearing OnUpdate script
+		frame.castBar.monitor:SetScript("OnUpdate", nil)
 		frame.castBar.monitor = nil
 	end
 end

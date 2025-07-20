@@ -243,16 +243,27 @@ end
 local function createMonitorTimer(fontString, frequency)
 	if( not fontString.monitor or fontString.monitor.frequency ~= frequency ) then
 		if fontString.monitor then
-			fontString.monitor:Cancel()
+			-- MOP Classic: Stop timer by clearing OnUpdate script
+			fontString.monitor:SetScript("OnUpdate", nil)
 		end
-		fontString.monitor  = C_Timer.NewTicker(frequency, function() fontString:UpdateTags() end)
+		-- MOP Classic: Replace C_Timer with CreateFrame timer
+		fontString.monitor = CreateFrame("Frame")
+		fontString.monitor.fontString = fontString
+		fontString.monitor:SetScript("OnUpdate", function(self, elapsed)
+			self.elapsed = (self.elapsed or 0) + elapsed
+			if self.elapsed >= frequency then
+				self.elapsed = 0
+				self.fontString:UpdateTags()
+			end
+		end)
 		fontString.monitor.frequency = frequency
 	end
 end
 
 local function cancelMonitorTimer(fontString)
 	if( fontString.monitor ) then
-		fontString.monitor:Cancel()
+		-- MOP Classic: Stop timer by clearing OnUpdate script
+		fontString.monitor:SetScript("OnUpdate", nil)
 		fontString.monitor = nil
 	end
 end

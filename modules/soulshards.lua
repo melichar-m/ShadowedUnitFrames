@@ -7,8 +7,9 @@ local soulsConfig = {max = 5, key = "soulShards", colorKey = "SOULSHARDS", power
 function Souls:OnEnable(frame)
 	frame.soulShards = frame.soulShards or CreateFrame("Frame", nil, frame)
 	frame.soulShards.cpConfig = soulsConfig
-	frame.soulShards.cpConfig.max = (GetSpecialization() == SPEC_WARLOCK_DESTRUCTION) and 50 or 5
-	frame.soulShards.cpConfig.grouping = (GetSpecialization() == SPEC_WARLOCK_DESTRUCTION) and UnitPowerDisplayMod(soulsConfig.powerType) or 1
+	-- MOP Classic: GetSpecialization() doesn't exist, use default values for MOP Classic compatibility
+	frame.soulShards.cpConfig.max = 5
+	frame.soulShards.cpConfig.grouping = 1
 	frame.comboPointType = soulsConfig.key
 
 	frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", self, "Update")
@@ -28,8 +29,9 @@ end
 function Souls:SpecChanged(frame)
 	-- update shard count on spec swap
 	if frame and frame.soulShards then
-		frame.soulShards.cpConfig.max = (GetSpecialization() == SPEC_WARLOCK_DESTRUCTION) and 50 or 5
-		frame.soulShards.cpConfig.grouping = (GetSpecialization() == SPEC_WARLOCK_DESTRUCTION) and UnitPowerDisplayMod(soulsConfig.powerType) or 1
+		-- MOP Classic: GetSpecialization() doesn't exist, use default values for MOP Classic compatibility
+		frame.soulShards.cpConfig.max = 5
+		frame.soulShards.cpConfig.grouping = 1
 	end
 	self:UpdateBarBlocks(frame)
 end
@@ -39,9 +41,11 @@ function Souls:GetComboPointType()
 end
 
 function Souls:GetPoints(unit)
-	return UnitPower("player", soulsConfig.powerType, (GetSpecialization() == SPEC_WARLOCK_DESTRUCTION))
+	-- MOP Classic: GetSpecialization() doesn't exist, use default behavior
+	return UnitPower("player", soulsConfig.powerType)
 end
 
 function Souls:GetMaxPoints(unit)
-	return UnitPowerMax("player", soulsConfig.powerType, (GetSpecialization() == SPEC_WARLOCK_DESTRUCTION))
+	-- MOP Classic: GetSpecialization() doesn't exist, use default behavior
+	return UnitPowerMax("player", soulsConfig.powerType)
 end
