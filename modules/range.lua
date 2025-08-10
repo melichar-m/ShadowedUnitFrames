@@ -50,13 +50,9 @@ local LSR = LibStub("SpellRange-1.0")
 local playerClass = select(2, UnitClass("player"))
 local rangeSpells = {}
 
-local UnitPhaseReason_o = UnitPhaseReason
+-- MoP Classic: UnitPhaseReason doesn't exist, provide stub implementation
 local UnitPhaseReason = function(unit)
-	local phase = UnitPhaseReason_o(unit)
-	if (phase == Enum.PhaseReason.WarMode or phase == Enum.PhaseReason.ChromieTime) and UnitIsVisible(unit) then
-		return nil
-	end
-	return phase
+	return nil -- No phase differences in MoP Classic
 end
 
 local function checkRange(self)

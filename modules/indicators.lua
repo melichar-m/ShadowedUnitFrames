@@ -30,6 +30,11 @@ function Indicators:UpdateClass(frame)
 	end
 end
 
+-- MoP Classic: UnitPhaseReason doesn't exist, provide stub function
+local function UnitPhaseReason(unit)
+	return nil -- No phase differences in MoP Classic
+end
+
 function Indicators:UpdatePhase(frame)
     if( not frame.indicators.phase or not frame.indicators.phase.enabled ) then return end
 
