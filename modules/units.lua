@@ -1193,9 +1193,15 @@ function Units:LoadZoneHeader(type)
 	headerFrames[type] = headerFrame
 
 	if( type == "arena" ) then
+		headerFrame.updatingArena = false  -- Recursion protection flag
 		headerFrame:SetScript("OnAttributeChanged", function(frame, key, value)
 			if( key == "childChanged" and value and frame.children[value] and frame:IsVisible() ) then
-				frame.children[value]:FullUpdate()
+				-- Prevent recursive updates
+				if not frame.updatingArena then
+					frame.updatingArena = true
+					frame.children[value]:FullUpdate()
+					frame.updatingArena = false
+				end
 			end
 		end)
 	end
@@ -1464,7 +1470,13 @@ end
 
 -- Deal with zone changes for enabling modules
 local instanceType, queueZoneCheck
+-- Add recursion protection flag at module level
+local isCheckingZone = false
+
 function Units:CheckPlayerZone(force)
+	-- Prevent recursive zone checks
+	if isCheckingZone then return end
+	
 	if( InCombatLockdown() ) then
 		queueZoneCheck = force and 2 or 1
 		return
@@ -1476,6 +1488,9 @@ function Units:CheckPlayerZone(force)
 
 	if( instance == instanceType and not force ) then return end
 	instanceType = instance
+	
+	-- Set recursion protection flag
+	isCheckingZone = true
 
 	ShadowUF:LoadUnits()
 	for frame in pairs(frameList) do
@@ -1492,6 +1507,9 @@ function Units:CheckPlayerZone(force)
 			end
 		end
 	end
+	
+	-- Clear recursion protection flag
+	isCheckingZone = false
 end
 
 -- Handle figuring out what auras players can cure
